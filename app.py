@@ -24,6 +24,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 JSON_FILE = "questoes.json"
 
 def carregar_questoes_do_arquivo():

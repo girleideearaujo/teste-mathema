@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipsi - Plataforma de Lógica Proposicional e DBN</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel para compilar JSX no browser -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="root" class="w-full max-w-6xl"></div>
+
+    <script type="text/babel">
+        function App() {
+            const [questoes, setQuestoes] = React.useState([]);
+            const [currentIndex, setCurrentIndex] = React.useState(0);
+            const [resposta, setResposta] = React.useState("");
+            const [confianca, setConfianca] = React.useState(50);
+            
+            const [answersMap, setAnswersMap] = React.useState({});
+            const [feedbacksMap, setFeedbacksMap] = React.useState({});
+            
+            const [estatisticas, setEstatisticas] = React.useState(null);
+            const [loading, setLoading] = React.useState(false);
+            const [concluido, setConcluido] = React.useState(false);
+
+            React.useEffect(() => {
+                fetch("http://localhost:8000/questoes")
+                    .then(res => res.json())
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            setQuestoes(data);
+                        }
+                    })
+                    .catch(err => console.error("Erro ao carregar questões da API:", err));
+            }, []);
+
+            const questaoAtual = questoes[currentIndex];
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!questaoAtual) return;
+
+                const qId = String(questaoAtual.id);
+                const novasAnswers = { ...answersMap, [qId]: resposta };
+                const novosFeedbacks = { ...feedbacksMap, [qId]: String(confianca) };
+
+                setAnswersMap(novasAnswers);
+                setFeedbacksMap(novosFeedbacks);
+                setLoading(true);
+
+                try {
+                    const response = await fetch("http://localhost:8000/inferencia", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            answers: novasAnswers,
+                            feedbacks: novosFeedbacks
+                        })
+                    });
+                    const data = await response.json();
+                    console.log("Resposta recebida da API /inferencia:", data); // Verifique no F12 do navegador
+                    setEstatisticas(data);
+                } catch (error) {
+                    console.error("Erro ao enviar para inferência:", error);
+                } finally {
+                    setLoading(false);
+                }
+
+                setResposta("");
+                setConfianca(50);
+
+                if (currentIndex + 1 < questoes.length) {
+                    setCurrentIndex(currentIndex + 1);
+                } else {
+                    setConcluido(true);
+                }
+            };
+
+            // Função auxiliar para renderizar dicionários ou listas de forma segura
+            const renderizarItensDBN = (dados) => {
+                if (!dados) return <p className="text-slate-500 text-xs italic">Nenhum dado retornado.</p>;
+                
+                // Se for um array
+                if (Array.isArray(dados)) {
+                    return dados.map((item, idx) => (
+                        <div key={idx} className="bg-slate-900 p-3 rounded-lg flex justify-between items-center text-sm border border-slate-700">
+                            <span className="text-slate-300 truncate max-w-[200px]">{item.name || `Tópico ${idx+1}`}</span>
+                            <span className="font-bold text-emerald-400">
+                                {typeof item.probability === 'number' ? (item.probability * 100).toFixed(1) + '%' : JSON.stringify(item)}
+                            </span>
+                        </div>
+                    ));
+                }
+                
+                // Se for um objeto/dicionário (ex: {'Lógica Proposicional': 0.5628})
+                if (typeof dados === 'object') {
+                    const entradas = Object.entries(dados);
+                    if (entradas.length === 0) return <p className="text-slate-500 text-xs italic">Dicionário vazio.</p>;
+                    
+                    return entradas.map(([topico, prob]) => (
+                        <div key={topico} className="bg-slate-900 p-3 rounded-lg flex justify-between items-center text-sm border border-slate-700">
+                            <span className="text-slate-300 truncate max-w-[200px]" title={topico}>{topico}</span>
+                            <span className="font-bold text-emerald-400">
+                                {typeof prob === 'number' ? (prob * 100).toFixed(1) + '%' : String(prob)}
+                            </span>
+                        </div>
+                    ));
+                }
+
+                return <span className="text-slate-300">{String(dados)}</span>;
+            };
+
+            if (questoes.length === 0) {
+                return (
+                    <div className="text-center p-12 bg-slate-800 rounded-2xl shadow-xl max-w-md mx-auto border border-slate-700">
+                        <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <h2 className="text-xl font-semibold text-amber-400">Carregando questões ou FastAPI desconectada...</h2>
+                        <p className="text-slate-400 mt-2 text-sm">Certifique-se de que o backend em FastAPI está rodando em <code className="bg-slate-900 px-2 py-1 rounded text-slate-200">http://localhost:8000</code>.</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+                    
+                    {/* COLUNA ESQUERDA: Questão e Formulário */}
+                    <div className="lg:col-span-7 bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl shadow-xl flex flex-col justify-between">
+                        <div>
+                            <div className="flex justify-between items-center mb-6">
+                                <span className="text-xs font-semibold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">
+                                    {questaoAtual ? questaoAtual.topico_geral : "Carregando..."}
+                                </span>
+                                <span className="text-sm text-slate-400 font-medium">
+                                    Questão {currentIndex + 1} de {questoes.length}
+                                </span>
+                            </div>
+
+                            {questaoAtual && (
+                                <div className="space-y-4">
+                                    <div className="text-xs font-medium text-slate-400 bg-slate-900/50 px-3 py-1.5 rounded-lg inline-block border border-slate-700/50">
+                                        Subtópico: {questaoAtual.topico_especifico}
+                                    </div>
+                                    <p className="text-sm text-indigo-200 bg-indigo-950/40 p-4 rounded-xl border border-indigo-900/50">
+                                        {questaoAtual.definicoes}
+                                    </p>
+                                    <h2 className="text-lg md:text-xl font-medium text-slate-100 leading-relaxed">
+                                        {questaoAtual.enunciado}
+                                    </h2>
+                                </div>
+                            )}
+                        </div>
+
+                        {!concluido ? (
+                            <form onSubmit={handleSubmit} className="mt-8 space-y-6 pt-6 border-t border-slate-700">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                                        Sua resposta (Linguagem Natural):
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        value={resposta}
+                                        onChange={(e) => setResposta(e.target.value)}
+                                        placeholder="Digite sua tradução aqui..."
+                                        required
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    />
+                                </div>
+
+                                <div>
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <label className="font-medium text-slate-300">O quão confiante está na sua resposta?</label>
+                                        <span className="text-indigo-400 font-bold">{confianca}%</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="1" 
+                                        max="100" 
+                                        value={confianca}
+                                        onChange={(e) => setConfianca(Number(e.target.value))}
+                                        className="w-full accent-indigo-500 bg-slate-900 cursor-pointer"
+                                    />
+                                    <div className="flex justify-between text-xs text-slate-500 mt-1">
+                                        <span>1% (Inseguro)</span>
+                                        <span>100% (Totalmente seguro)</span>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit" 
+                                    disabled={loading}
+                                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 px-6 rounded-xl transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 cursor-pointer"
+                                >
+                                    {loading ? "Processando Inferência Bayesiana..." : "Enviar Resposta e Avançar"}
+                                </button>
+                            </form>
+                        ) : (
+                            <div className="mt-8 text-center p-6 bg-emerald-950/30 border border-emerald-900/50 rounded-xl">
+                                <h3 className="text-xl font-bold text-emerald-400 mb-2">Quiz Concluído! 🎉</h3>
+                                <p className="text-slate-300 text-sm">Suas respostas foram avaliadas pelo solver e processadas pela Rede Bayesiana no backend.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* COLUNA DIREITA: Estatísticas e Inferência DBN */}
+                    <div className="lg:col-span-5 bg-slate-800 border border-slate-700 p-6 md:p-8 rounded-2xl shadow-xl flex flex-col justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center gap-2">
+                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                Painel Estatístico & DBN
+                            </h3>
+
+                            {estatisticas ? (
+                                <div className="space-y-6">
+                                    <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
+                                        <span className="text-xs text-slate-400 uppercase tracking-wider block mb-1">Probabilidade Global de Acerto (Tutor)</span>
+                                        <div className="text-3xl font-extrabold text-indigo-400">
+                                            {(estatisticas.probabilidade_geral * 100).toFixed(1)}%
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-300 mb-3">Probabilidades do Aluno:</h4>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                            {renderizarItensDBN(estatisticas.probabilidades_aluno)}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-300 mb-3">Probabilidades do Tutor:</h4>
+                                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                                            {renderizarItensDBN(estatisticas.probabilidades_tutor)}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-20 text-slate-500">
+                                    <p>Envie sua primeira resposta para gerar as estatísticas em tempo real da Rede Bayesiana.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-slate-700 text-xs text-slate-500 text-center">
+                            MATHEMA 
+                        </div>
+                    </div>
+
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

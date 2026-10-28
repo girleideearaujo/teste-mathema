@@ -1,0 +1,96 @@
+{
+  "Tradução: De Lógica para Linguagem Natural (Básico)": [
+    {
+      "id": 0,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Chove' e Q: 'O trânsito está lento'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P -> Q",
+      "gabarito": "Se chove, então o trânsito está lento.",
+      "dificuldade": 0.20
+    },
+    {
+      "id": 1,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Estudo matemática' e Q: 'Tiro notas boas'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P ^ Q",
+      "gabarito": "Estudo matemática e tiro notas boas.",
+      "dificuldade": 0.15
+    },
+    {
+      "id": 2,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'O sol está brilhando' e Q: 'Está chovendo'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P v Q",
+      "gabarito": "O sol está brilhando ou está chovendo.",
+      "dificuldade": 0.20
+    },
+    {
+      "id": 3,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'O teste foi difícil'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: ~P",
+      "gabarito": "O teste não foi difícil.",
+      "dificuldade": 0.15
+    },
+    {
+      "id": 4,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Vou ao cinema' e Q: 'Termino o trabalho'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P <-> Q",
+      "gabarito": "Vou ao cinema se e somente se termino o trabalho.",
+      "dificuldade": 0.25
+    }
+  ],
+  "Tradução: De Lógica para Linguagem Natural (Complexo)": [
+    {
+      "id": 5,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Trabalho muito', Q: 'Ganho bem' e R: 'Viajo'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P -> (Q ^ R)",
+      "gabarito": "Se trabalho muito, então ganho bem e viajo.",
+      "dificuldade": 0.45
+    },
+    {
+      "id": 6,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Estudo' e Q: 'Passei na prova'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: ~P v Q",
+      "gabarito": "Não estudo ou passei na prova.",
+      "dificuldade": 0.30
+    },
+    {
+      "id": 7,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'O alarme toca', Q: 'A porta tranca' e R: 'A luz acende'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: P -> (Q ^ R)",
+      "gabarito": "Se o alarme toca, então a porta tranca e a luz acende.",
+      "dificuldade": 0.40
+    },
+    {
+      "id": 8,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'O documento é assinado', Q: 'O documento é rubricado' e R: 'O documento é válido'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: R -> (P ^ Q)",
+      "gabarito": "Se o documento é válido, então ele é assinado e rubricado.",
+      "dificuldade": 0.60
+    },
+    {
+      "id": 9,
+      "topico_geral": "Lógica Proposicional",
+      "topico_especifico": "Tradução para Linguagem Natural",
+      "definicoes": "Considere P: 'Chove', Q: 'Venta' e R: 'Faz frio'.",
+      "enunciado": "Traduza a fórmula para a linguagem natural: (P v Q) ^ ~R",
+      "gabarito": "Chove ou venta, mas não faz frio.",
+      "dificuldade": 0.55
+    }
+  ]
+}

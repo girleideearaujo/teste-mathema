@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict
 from dbn import Student_DBN
@@ -121,4 +122,5 @@ def executar_inferencia(data: QuizSubmission):
 
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to FastAPI"}
+    from fastapi.responses import FileResponse
+    return FileResponse("static/index.html")
